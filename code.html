@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Scroll Journey</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/SplitText.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/GLTFLoader.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        #snow-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(229, 46, 113, 0.3);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero p {
+            font-size: 1.5rem;
+            max-width: 600px;
+            opacity: 0;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .photo-gallery {
+            width: 75vw;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10; /* Ensure photos are above the snow */
+        }
+
+        .photo-item {
+            height: 75vh;
+            margin: 50px 0;
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            opacity: 0; /* Start hidden */
+            transform: scale(0.8); /* Start scaled down */
+            backdrop-filter: blur(2px);
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .scroll-message {
+            margin: 20px 0;
+            opacity: 0; /* Start hidden */
+            filter: blur(4px); /* Start blurred */
+            transition: opacity 0.5s ease, filter 0.5s ease; /* Smooth transition */
+        }
+
+        .message {
+            font-size: clamp(1.6rem, 4vw, 3rem);
+            line-height: 1.5;
+            font-weight: 600;
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 50%;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: white;
+            transform: scale(1.5);
+            box-shadow: 0 0 10px white;
+        }
+
+        footer {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        @media (max-width: 768px) {
+            .photo-item {
+                height: 60vh;
+            }
+
+            .scroll-indicator {
+                right: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="snow-canvas"></canvas>
+    
+    <section class="hero">
+        <h1 class="split-title">Happy Birthday Leena</h1>
+        <p>Scroll down to relive your beautiful memories together</p>
+    </section>
+
+    <div class="photo-gallery">
+        <div class="photo-item">
+            <img src="images/photo1.jpg" alt="Memory 1">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"Your light brightens every life it touches. Happy Birthday!"</div>
+        </div>
+        <div class="photo-item">
+            <img src="images/photo2.jpg" alt="Memory 2">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"Cherishing every moment spent together."</div>
+        </div>
+        <div class="photo-item">
+            <img src="images/photo3.jpg" alt="Memory 3">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"Here's to more beautiful memories!"</div>
+        </div>
+        <div class="photo-item">
+            <img src="images/photo4.jpg" alt="Memory 4">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"You are loved more than you know!"</div>
+        </div>
+        <div class="photo-item">
+            <img src="images/photo5.webp" alt="Memory 5">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"Wishing you all the happiness in the world!"</div>
+        </div>
+        <div class="photo-item">
+            <img src="images/photo6.jpg" alt="Memory 6">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"Every moment is a treasure with you!"</div>
+        </div>
+        <div class="photo-item">
+            <img src="images/photo7.jpg" alt="Memory 7">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"You make the world a better place!"</div>
+        </div>
+        <div class="photo-item">
+            <img src="images/photo8.jpg" alt="Memory 8">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"Here's to many more adventures together!"</div>
+        </div>
+        <div class="photo-item">
+            <img src="images/photo9.jpg" alt="Memory 9">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"Your smile lights up the room!"</div>
+        </div>
+        <div class="photo-item">
+            <img src="images/photo10.jpg" alt="Memory 10">
+        </div>
+        <div class="scroll-message">
+            <div class="message">"Cheers to you on your special day!"</div>
+        </div>
+    </div>
+
+    <div class="scroll-indicator">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+
+    <footer>
+        <div>Wishing you the happiest of birthdays! ❤️</div>
+    </footer>
+
+    <script>
+        // Initialize GSAP and ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Snowfall effect
+        const canvas = document.getElementById('snow-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const snowflakes = [];
+        const snowflakeCount = 150;
+
+        class Snowflake {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height * -1;
+                this.size = Math.random() * 3 + 1;
+                this.speed = Math.random() * 2 + 1;
+                this.velocity = Math.random() * 0.5;
+                this.angle = Math.random() * 360;
+                this.spin = Math.random() < 0.5 ? 1 : -1;
+                this.opacity = Math.random() * 0.5 + 0.3;
+            }
+
+            update() {
+                this.y += this.speed;
+                this.x += Math.sin(this.angle * Math.PI / 180) * this.velocity;
+                this.angle += 0.1 * this.spin;
+
+                if (this.y > canvas.height) {
+                    this.y = Math.random() * 20 - 20;
+                    this.x = Math.random() * canvas.width;
+                }
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+                ctx.fill();
+            }
+        }
+
+        function initSnow() {
+            for (let i = 0; i < snowflakeCount; i++) {
+                snowflakes.push(new Snowflake());
+            }
+        }
+
+        function animateSnow() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let flake of snowflakes) {
+                flake.update();
+                flake.draw();
+            }
+            
+            requestAnimationFrame(animateSnow);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        initSnow();
+        animateSnow();
+
+        // Animate hero text
+        gsap.from(".hero h1", {
+            duration: 1.5,
+            y: -50,
+            opacity: 0,
+            ease: "back.out(1.7)"
+        });
+
+        gsap.to(".hero p", {
+            duration: 1,
+            delay: 0.5,
+            opacity: 1,
+            ease: "power2.out"
+        });
+
+        // Photo animations
+        const photos = gsap.utils.toArray(".photo-item");
+        const messages = gsap.utils.toArray(".scroll-message");
+        photos.forEach((photo, i) => {
+            gsap.to(photo, {
+                scrollTrigger: {
+                    trigger: photo,
+                    start: "top 80%",
+                    end: "top 30%",
+                    scrub: 0.5,
+                    id: "photo" + i
+                },
+                opacity: 1,
+                scale: 1,
+                duration: 1,
+                ease: "power2.out"
+            });
+
+            // Animate corresponding message
+            gsap.to(messages[i], {
+                scrollTrigger: {
+                    trigger: photo,
+                    start: "top 60%",
+                    end: "top 30%",
+                    scrub: 0.5,
+                },
+                opacity: 1,
+                filter: "blur(0px)",
+                duration: 1,
+                ease: "power2.out"
+            });
+
+            // Hover effect
+            photo.addEventListener("mouseenter", () => {
+                gsap.to(photo.querySelector("img"), {
+                    scale: 1.1,
+                    duration: 0.5
+                });
+            });
+
+            photo.addEventListener("mouseleave", () => {
+                gsap.to(photo.querySelector("img"), {
+                    scale: 1,
+                    duration: 0.5
+                });
+            });
+        });
+
+        // Scroll indicator
+        const dots = document.querySelectorAll(".dot");
+        ScrollTrigger.create({
+            trigger: ".photo-gallery",
+            start: "top top",
+            end: "bottom bottom",
+            onUpdate: self => {
+                const progress = self.progress;
+                const activeDot = Math.floor(progress * (dots.length - 1));
+                
+                dots.forEach((dot, i) => {
+                    if (i === activeDot) {
+                        dot.classList.add("active");
+                    } else {
+                        dot.classList.remove("active");
+                    }
+                });
+            }
+        });
+
+        // Footer animation
+        ScrollTrigger.create({
+            trigger: "footer",
+            start: "top 80%",
+            onEnter: () => {
+                gsap.from("footer div", {
+                    duration: 1,
+                    y: 50,
+                    opacity: 0,
+                    ease: "back.out(1.7)"
+                });
+            }
+        });
+
+        // SplitText animation
+        gsap.registerPlugin(SplitText);
+        const split = new SplitText(".split-title", {
+            type: "chars",
+        });
+
+        gsap.from(split.chars, {
+            scrollTrigger: {
+                trigger: ".split-title",
+                start: "top 70%",
+                toggleActions: "play none none none",
+            },
+            opacity: 0,
+            y: 40,
+            stagger: 0.05,
+            duration: 0.6,
+            ease: "power3.out",
+            onComplete: () => {
+                console.log("All letters have animated!");
+            },
+        });
+
+        // Initialize Three.js scene
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Load 3D models
+        const loader = new THREE.GLTFLoader();
+
+        const createModel = (modelPath, position) => {
+            loader.load(modelPath, (gltf) => {
+                const model = gltf.scene;
+                model.position.set(position.x, position.y, position.z);
+                model.scale.set(0.5, 0.5, 0.5); // Adjust scale as needed
+                scene.add(model);
+
+                // Animate the model
+                gsap.to(model.position, {
+                    y: position.y + 200, // Move upwards
+                    duration: 3,
+                    ease: "power1.out",
+                    onComplete: () => {
+                        scene.remove(model); // Remove model after animation
+                    }
+                });
+            });
+        };
+
+        // Create animations for your specific 3D model
+        const createCracker = () => {
+            createModel('models/cracker.glb', { x: Math.random() * 200 - 100, y: -50, z: 0 });
+        };
+
+        const createBalloon = () => {
+            createModel('models/balloon.glb', { x: Math.random() * 200 - 100, y: -50, z: 0 });
+        };
+
+        const createCake = () => {
+            createModel('models/cake.glb', { x: Math.random() * 200 - 100, y: -50, z: 0 });
+        };
+
+        // Create animations at intervals
+        setInterval(createCracker, 500);
+        setInterval(createBalloon, 1000);
+        setInterval(createCake, 3000);
+
+        // Animation loop
+        const animate = function () {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        };
+
+        animate();
+    </script>
+</body>
+</html>
